@@ -1,8 +1,8 @@
 package com.example
 
 import akka.actor.Actor
-import net.liftweb.json.DefaultFormats
-import net.liftweb.json.Serialization.{read, write}
+import com.example.PersonaJsonMarshaller.Persona
+import com.example.ResponseJsonMarshaller.Response
 import spray.http.MediaTypes._
 import spray.http.StatusCodes.InternalServerError
 import spray.routing._
@@ -41,10 +41,6 @@ class MyServiceActor extends Actor with MyService {
 // this trait defines our service behavior independently from the service actor
 trait MyService extends HttpService {
 
-  implicit val formats = DefaultFormats
-  val p = Persona("hola", "prueba");
-  /*val algo: Persona = read("""{"nombre":"mary", "apellido":89} """)
-  println("sou algo"+ algo)*/
   val myRoute = {
     path("") {
       get {
@@ -69,19 +65,13 @@ trait MyService extends HttpService {
         }
       }
     }
-    path("json") {
-      get {
-        respondWithMediaType(`application/json`) {
-          //complete("""{"name":"mary", "age":89} """)
-          complete(write(p))
+    path("posta") {
+      post {
+        entity(as[Persona]) { data =>
+          println(s"${data.nombre} y ${data.apellido}")
+          complete(Response("MElo", 200))
         }
       }
     }
-    /*path("posta") {
-      post {
-        entity(read(Persona)) { quiz =>
-        }
-      }
-    }*/
   }
 }

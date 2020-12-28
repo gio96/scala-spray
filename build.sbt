@@ -17,8 +17,10 @@ libraryDependencies ++= {
     "com.typesafe.akka"   %%  "akka-actor"    % akkaV,
     "com.typesafe.akka"   %%  "akka-testkit"  % akkaV   % "test",
     "org.specs2"          %%  "specs2-core"   % "2.3.11" % "test",
-    //"org.json4s" %% "json4s-native" % "3.7.0-M7"
-    "net.liftweb" %% "lift-json" % "3.4.3"
+    "org.json4s" %% "json4s-native" % "3.7.0-M7",
+    "com.typesafe.slick" %% "slick" % "3.3.1",
+    "com.h2database" % "h2" % "1.4.200"
+    //"net.liftweb" %% "lift-json" % "3.4.3"
   )
 
 }
