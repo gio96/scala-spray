@@ -19,7 +19,7 @@ libraryDependencies ++= {
     "org.specs2"          %%  "specs2-core"   % "2.3.11" % "test",
     "org.json4s" %% "json4s-native" % "3.7.0-M7",
     "com.typesafe.slick" %% "slick" % "3.3.1",
-    "com.h2database" % "h2" % "1.4.200"
+    "org.reactivemongo" %% "reactivemongo" % "1.0.1" % "provided"
     //"net.liftweb" %% "lift-json" % "3.4.3"
   )
 
