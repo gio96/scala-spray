@@ -2,6 +2,7 @@ package com.example
 
 import akka.actor.Actor
 import com.example.PersonaJsonMarshaller.Persona
+import com.example.SumaJsonMarshaller.Suma
 import spray.http.MediaTypes._
 import spray.http.StatusCodes.InternalServerError
 import spray.routing._
@@ -47,55 +48,29 @@ trait MyService extends HttpService {
   val myRoute = {
     path("") {
       get {
-        respondWithMediaType(`application/json`) { // XML is marshalled to `text/xml` by default, so we simply override here
-          /*complete {
-            <html>
-              <body>
-                <h1>Say hello to <i>spray-routing</i> on <i>spray-can</i>!</h1>
-              </body>
-            </html>
-          }*/
+        respondWithMediaType(`application/json`) {
           complete("hi")
 
         }
       }
-    }
+    } ~
     //(path("test") & parameters('color, 'backgroundColor)) { (color, backgroundColor) =>
-    (path("test") & parameters('color.as[String], 'backgroundColor.as[String])) { (color, backgroundColor) =>
+    (path("resta") & parameters('numero1.as[Double], 'numero2.as[Double])) { (numero1, numero2) =>
       get {
         respondWithMediaType(`application/json`) {
-          complete(s"test $color $backgroundColor")
+          complete(Operaciones.resta(numero1, numero2).toString)
         }
       }
-    }
-    path("posta") {
+    } ~
+    path("suma") {
       post {
-        entity(as[Persona]) { data =>
-          println(s"${data.nombre} y ${data.apellido}")
-          //MongoDriverPersisentece.dbFromConnection()
-          // .flatMap(algo => MongoDriverPersisentece.simpleInsert(algo))
-          /*val mongoDriverPersisentece = new MongoDriverPersisentece
-           mongoDriverPersisentece.connection7()
-            .flatMap(value => mongoDriverPersisentece.dbFromConnection2(value))
-            .flatMap(valor => mongoDriverPersisentece.simpleInsert(valor))
-            .onComplete { v =>
-              println(s"The original future has returned:")
-            }*/
-          //complete(Response("MElo", 200))
-          //complete(Operaciones.suma(5, 7).map(_.toString))
-          /*val operacion = Operaciones.suma(5, 7).onComplete {
-            case Success(value) => value
-            case Failure(cause) => Failure(new IllegalStateException(cause))
-          }*/
-          //Operaciones.suma(5, 7).map(valor => complete(valor.toString))
-          //complete("")
-          //ctx => Operaciones.suma(5, 7).map(valor => ctx.complete(valor.toString))
+        entity(as[Suma]) { data =>
+          println(s"${data.numero1} y ${data.numero2}")
           ctx =>
-            Operaciones.suma(5, 8).onComplete {
+            Operaciones.suma(data.numero1, data.numero2).onComplete {
               case Success(value) => ctx.complete(value.toString)
               case Failure(cause) => Failure(new IllegalStateException(cause))
             }
-
         }
       }
     }
