@@ -8,6 +8,7 @@ import spray.http.StatusCodes.InternalServerError
 import spray.routing._
 import spray.util.LoggingContext
 
+import scala.None
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success}
 
@@ -19,6 +20,7 @@ import scala.util.{Failure, Success}
 class MyServiceActor extends Actor with MyService {
 
 
+  //TODO manejador de Excepciones
   implicit def myExceptionHandler(implicit log: LoggingContext) =
     ExceptionHandler {
       case e: ArithmeticException =>
@@ -28,8 +30,6 @@ class MyServiceActor extends Actor with MyService {
         }
     }
 
-
-  //compact(render(Persona("","")))
 
   // the HttpService trait defines only one abstract member, which
   // connects the services environment to the enclosing actor or test
@@ -45,6 +45,8 @@ class MyServiceActor extends Actor with MyService {
 // this trait defines our service behavior independently from the service actor
 trait MyService extends HttpService {
 
+  val ERROR_DIVISION: String = "No se puede dividir entre 0";
+
   val myRoute = {
     path("") {
       get {
@@ -54,25 +56,49 @@ trait MyService extends HttpService {
         }
       }
     } ~
-    //(path("test") & parameters('color, 'backgroundColor)) { (color, backgroundColor) =>
-    (path("resta") & parameters('numero1.as[Double], 'numero2.as[Double])) { (numero1, numero2) =>
-      get {
-        respondWithMediaType(`application/json`) {
-          complete(Operaciones.resta(numero1, numero2).toString)
+      //(path("test") & parameters('color, 'backgroundColor)) { (color, backgroundColor) =>
+      (path("resta") & parameters('numero1.as[Double], 'numero2.as[Double])) { (numero1, numero2) =>
+        get {
+          respondWithMediaType(`application/json`) {
+            complete(Operaciones.resta(numero1, numero2).toString)
+          }
+        }
+      } ~
+      path("suma") {
+        post {
+          entity(as[Suma]) { data =>
+            //println(s"${data.numero1} y ${data.numero2}")
+            ctx =>
+              Operaciones.suma(data.numero1, data.numero2).onComplete {
+                case Success(value) => ctx.complete(value.toString)
+                //case Failure(cause) => Failure(ctx.(new IllegalStateException(cause)))
+                case Failure(cause) => ctx.failWith(new IllegalStateException(cause))
+              }
+          }
+        }
+      } ~
+      (path("division") & parameters('numero1.as[Double], 'numero2.as[Double])) { (numero1, numero2) =>
+        get {
+          respondWithMediaType(`application/json`) {
+            ctx =>
+              Operaciones.division(numero1, numero2).onComplete {
+                //case Success(value) => ctx.complete(value.getOrElse(new ArithmeticException()).toString)
+                case Success(value) => ctx.complete(value.getOrElse(ERROR_DIVISION).toString)
+                case Failure(cause) => ctx.failWith(new IllegalStateException(cause))
+              }
+          }
+        }
+      } ~
+      (path("division2") & parameters('numero1.as[Double], 'numero2.as[Double])) { (numero1, numero2) =>
+        get {
+          respondWithMediaType(`application/json`) {
+            ctx =>
+              Operaciones.division4(numero1, numero2) match {
+                case Right(value) => ctx.complete(value.toString)
+                case Left(cause) => ctx.failWith(new ArithmeticException(cause))
+              }
+          }
         }
       }
-    } ~
-    path("suma") {
-      post {
-        entity(as[Suma]) { data =>
-          println(s"${data.numero1} y ${data.numero2}")
-          ctx =>
-            Operaciones.suma(data.numero1, data.numero2).onComplete {
-              case Success(value) => ctx.complete(value.toString)
-              case Failure(cause) => Failure(new IllegalStateException(cause))
-            }
-        }
-      }
-    }
   }
 }
