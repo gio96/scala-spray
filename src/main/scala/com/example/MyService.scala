@@ -1,14 +1,13 @@
 package com.example
 
 import akka.actor.Actor
-import com.example.PersonaJsonMarshaller.Persona
+import com.example.Boot.serviceMultiplicacion
 import com.example.SumaJsonMarshaller.Suma
 import spray.http.MediaTypes._
 import spray.http.StatusCodes.InternalServerError
 import spray.routing._
 import spray.util.LoggingContext
 
-import scala.None
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success}
 
@@ -41,9 +40,18 @@ class MyServiceActor extends Actor with MyService {
   def receive = runRoute(myRoute)
 }
 
+class MultiplicacionActor extends Actor {
+  override def receive: Receive = {
+    case Int => sender ! 10
+    case ctx: RequestContext => ctx.complete(Operaciones.multiplicacion(3, 5).toString)
+  }
+}
+
 
 // this trait defines our service behavior independently from the service actor
 trait MyService extends HttpService {
+
+  //val serviceMultiplicacion = system.actorOf(Props[MultiplicacionActor], "demo-multipliacion")
 
   val ERROR_DIVISION: String = "No se puede dividir entre 0";
 
@@ -56,6 +64,15 @@ trait MyService extends HttpService {
         }
       }
     } ~
+      (path("multiplicacion") & parameters('numero1.as[Double], 'numero2.as[Double])) { (numero1, numero2) =>
+        get {
+          respondWithMediaType(`application/json`) {
+            ctx =>
+              serviceMultiplicacion ! ctx
+              //ctx.complete(Operaciones.multiplicacion(numero1, numero2).toString)
+          }
+        }
+      } ~
       //(path("test") & parameters('color, 'backgroundColor)) { (color, backgroundColor) =>
       (path("resta") & parameters('numero1.as[Double], 'numero2.as[Double])) { (numero1, numero2) =>
         get {
@@ -82,7 +99,6 @@ trait MyService extends HttpService {
           respondWithMediaType(`application/json`) {
             ctx =>
               Operaciones.division(numero1, numero2).onComplete {
-                //case Success(value) => ctx.complete(value.getOrElse(new ArithmeticException()).toString)
                 case Success(value) => ctx.complete(value.getOrElse(ERROR_DIVISION).toString)
                 case Failure(cause) => ctx.failWith(new IllegalStateException(cause))
               }
