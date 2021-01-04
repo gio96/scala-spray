@@ -19,7 +19,9 @@ libraryDependencies ++= {
     "org.specs2"          %%  "specs2-core"   % "2.3.11" % "test",
     "org.json4s" %% "json4s-native" % "3.7.0-M7",
     "com.typesafe.slick" %% "slick" % "3.3.1",
-    "org.reactivemongo" %% "reactivemongo" % "1.0.1" % "provided"
+    "org.reactivemongo" %% "reactivemongo" % "1.0.1" % "provided",
+    "org.scalatest" %% "scalatest" % "3.0.8" % Test
+    //"org.scalatest" %% "scalatest" % "3.3.0-SNAP3" % Test
     //"net.liftweb" %% "lift-json" % "3.4.3"
   )
 

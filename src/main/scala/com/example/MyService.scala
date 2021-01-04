@@ -1,6 +1,8 @@
 package com.example
 
 import akka.actor.Actor
+import akka.pattern.ask
+import akka.util.Timeout
 import com.example.Boot.serviceMultiplicacion
 import com.example.SumaJsonMarshaller.Suma
 import spray.http.MediaTypes._
@@ -9,6 +11,7 @@ import spray.routing._
 import spray.util.LoggingContext
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration.DurationInt
 import scala.util.{Failure, Success}
 
 
@@ -40,10 +43,23 @@ class MyServiceActor extends Actor with MyService {
   def receive = runRoute(myRoute)
 }
 
-class MultiplicacionActor extends Actor {
+/*class MultiplicacionActor(value1:Double, value2:Double) extends Actor {
   override def receive: Receive = {
     case Int => sender ! 10
     case ctx: RequestContext => ctx.complete(Operaciones.multiplicacion(3, 5).toString)
+  }
+}*/
+
+/*class MultiplicacionActor() extends Actor {
+  override def receive: Receive = {
+    case Int => sender ! 10
+    case ctx: RequestContext => ctx.complete(Operaciones.multiplicacion(3, 5).toString)
+  }
+}*/
+
+class MultiplicacionActor() extends Actor {
+  override def receive: Receive = {
+    case (numero1: Double, numero2: Double) => sender ! Operaciones.multiplicacion(numero1, numero2)
   }
 }
 
@@ -51,7 +67,7 @@ class MultiplicacionActor extends Actor {
 // this trait defines our service behavior independently from the service actor
 trait MyService extends HttpService {
 
-  //val serviceMultiplicacion = system.actorOf(Props[MultiplicacionActor], "demo-multipliacion")
+  implicit val timeout = Timeout(5.seconds)
 
   val ERROR_DIVISION: String = "No se puede dividir entre 0";
 
@@ -67,9 +83,9 @@ trait MyService extends HttpService {
       (path("multiplicacion") & parameters('numero1.as[Double], 'numero2.as[Double])) { (numero1, numero2) =>
         get {
           respondWithMediaType(`application/json`) {
-            ctx =>
-              serviceMultiplicacion ! ctx
-              //ctx.complete(Operaciones.multiplicacion(numero1, numero2).toString)
+            complete {
+              (serviceMultiplicacion ? (numero1, numero2)).map(resultado => resultado.toString)
+            }
           }
         }
       } ~
