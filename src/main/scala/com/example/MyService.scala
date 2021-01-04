@@ -1,16 +1,22 @@
 package com.example
 
-import akka.actor.Actor
+import akka.actor.{Actor, ActorSystem}
+import akka.io.IO
 import akka.pattern.ask
 import akka.util.Timeout
 import com.example.Boot.serviceMultiplicacion
-import com.example.SumaJsonMarshaller.Suma
+import com.example.SumaJsonMarshaller.{Suma, json4sFormats}
+import spray.can.Http
+import spray.http.{HttpRequest, HttpResponse}
 import spray.http.MediaTypes._
 import spray.http.StatusCodes.InternalServerError
+import spray.httpx.RequestBuilding.Get
+import spray.httpx.ResponseTransformation.unmarshal
 import spray.routing._
 import spray.util.LoggingContext
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
 import scala.util.{Failure, Success}
 
@@ -129,6 +135,18 @@ trait MyService extends HttpService {
                 case Right(value) => ctx.complete(value.toString)
                 case Left(cause) => ctx.failWith(new ArithmeticException(cause))
               }
+          }
+        }
+      } ~
+      path("serviciolocation") {
+        get {
+          respondWithMediaType(`application/json`) {
+            ctx => {
+              final case class Item(name: String, lon: Double, lat: Double, id: Long);
+              implicit val system = ActorSystem()
+              import system.dispatcher
+
+            }
           }
         }
       }
