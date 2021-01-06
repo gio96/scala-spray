@@ -137,18 +137,6 @@ trait MyService extends HttpService {
               }
           }
         }
-      } ~
-      path("serviciolocation") {
-        get {
-          respondWithMediaType(`application/json`) {
-            ctx => {
-              final case class Item(name: String, lon: Double, lat: Double, id: Long);
-              implicit val system = ActorSystem()
-              import system.dispatcher
-
-            }
-          }
-        }
       }
   }
 }
