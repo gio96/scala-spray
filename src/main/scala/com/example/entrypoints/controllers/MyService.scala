@@ -1,22 +1,17 @@
-package com.example
+package com.example.entrypoints.controllers
 
-import akka.actor.{Actor, ActorSystem}
-import akka.io.IO
+import akka.actor.Actor
 import akka.pattern.ask
 import akka.util.Timeout
-import com.example.Boot.serviceMultiplicacion
-import com.example.SumaJsonMarshaller.{Suma, json4sFormats}
-import spray.can.Http
-import spray.http.{HttpRequest, HttpResponse}
+import com.example.application.Boot.serviceMultiplicacion
+import com.example.Operaciones
+import com.example.domain.model.entities.SumaJsonMarshaller.Suma
 import spray.http.MediaTypes._
 import spray.http.StatusCodes.InternalServerError
-import spray.httpx.RequestBuilding.Get
-import spray.httpx.ResponseTransformation.unmarshal
 import spray.routing._
 import spray.util.LoggingContext
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
 import scala.util.{Failure, Success}
 

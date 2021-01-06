@@ -1,12 +1,13 @@
-package com.example
+package com.example.application
 
 import akka.actor.{ActorSystem, Props}
 import akka.io.IO
 import akka.pattern.ask
 import akka.util.Timeout
+import com.example.entrypoints.controllers.{MultiplicacionActor, MyServiceActor}
 import spray.can.Http
 
-import scala.concurrent.duration._
+import scala.concurrent.duration.DurationInt
 
 object Boot extends App {
 
