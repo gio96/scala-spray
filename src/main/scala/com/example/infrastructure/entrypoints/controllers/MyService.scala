@@ -21,7 +21,7 @@ import scala.util.{Failure, Success}
 // we want to be able to test it independently, without having to spin up an actor
 
 
-class MyServiceActor extends Actor with MyService {
+class MyServiceActor() extends Actor with MyService {
 
 
   //TODO manejador de Excepciones
@@ -71,6 +71,7 @@ trait MyService extends HttpService {
 
   implicit val timeout = Timeout(5.seconds)
 
+
   val ERROR_DIVISION: String = "No se puede dividir entre 0";
 
   val myRoute = {
@@ -95,7 +96,8 @@ trait MyService extends HttpService {
       (path("resta") & parameters('numero1.as[Double], 'numero2.as[Double])) { (numero1, numero2) =>
         get {
           respondWithMediaType(`application/json`) {
-            complete(new OperacionesUseCase().resta(numero1, numero2).toString)
+            //complete(new OperacionesUseCase().resta(numero1, numero2).toString)
+            complete("")
           }
         }
       } ~

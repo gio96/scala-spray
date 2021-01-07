@@ -5,7 +5,7 @@ import akka.io.IO
 import akka.pattern.ask
 import akka.util.Timeout
 import com.example.infrastructure.entrypoints.controllers.{MultiplicacionActor, MyServiceActor}
-import com.google.inject.Guice
+import com.google.inject.{Guice, Injector}
 import spray.can.Http
 
 import scala.concurrent.duration.DurationInt
@@ -18,14 +18,22 @@ import com.google.inject.{AbstractModule, Guice}
 
 object Boot extends App {
 
-  private val injector = Guice.createInjector(new AbstractModule() {
+  implicit val injector: Injector = Guice.createInjector(new AbstractModule() {
     override def configure() {
       //bind(classOf[BankRepository]).to(classOf[BankRepositoryImpl])
       bind(classOf[OperacionesGateway]).to(classOf[OperacionesGatewayImpl])
+      //bind(classOf[OperacionesGateway]).to(classOf[OperacionesGatewayImpl])
     }
   })
 
-  private val bankService = injector.getInstance(classOf[OperacionesUseCase])
+  //private val bankService = injector.getInstance(classOf[OperacionesUseCase])
+
+  //val injector = Guice.createInjector(new GuiceDemo())
+
+  val prueba = injector.getInstance(classOf[OperacionesUseCase])
+  private val operacionService = injector.getInstance(classOf[MyServiceActor])
+
+  println(prueba.resta(8,5))
 
   // we need an ActorSystem to host our application in
   implicit val system = ActorSystem("on-spray-can")
