@@ -1,4 +1,4 @@
-package com.example.entrypoints.controllers
+package com.example.infrastructure.entrypoints.controllers
 
 import akka.actor.Actor
 import akka.pattern.ask
@@ -6,6 +6,7 @@ import akka.util.Timeout
 import com.example.application.Boot.serviceMultiplicacion
 import com.example.Operaciones
 import com.example.domain.model.entities.SumaJsonMarshaller.Suma
+import com.example.domain.usecase.OperacionesUseCase
 import spray.http.MediaTypes._
 import spray.http.StatusCodes.InternalServerError
 import spray.routing._
@@ -94,7 +95,7 @@ trait MyService extends HttpService {
       (path("resta") & parameters('numero1.as[Double], 'numero2.as[Double])) { (numero1, numero2) =>
         get {
           respondWithMediaType(`application/json`) {
-            complete(Operaciones.resta(numero1, numero2).toString)
+            complete(new OperacionesUseCase().resta(numero1, numero2).toString)
           }
         }
       } ~

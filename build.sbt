@@ -24,7 +24,8 @@ libraryDependencies ++= {
     "org.scalatest" %% "scalatest" % "3.0.8" % Test,
     "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion,
     "com.typesafe.akka" %% "akka-http-spray-json" % AkkaHttpVersion,
-    "org.mockito" % "mockito-core" % "2.8.47" % "test"
+    "org.mockito" % "mockito-core" % "2.8.47" % "test",
+    "net.codingwell" %% "scala-guice" % "4.2.11"
     //"org.scalatest" %% "scalatest" % "3.3.0-SNAP3" % Test
     //"net.liftweb" %% "lift-json" % "3.4.3"
   )
