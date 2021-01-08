@@ -6,7 +6,11 @@ import akka.util.Timeout
 import com.example.application.Boot.serviceMultiplicacion
 import com.example.Operaciones
 import com.example.domain.model.entities.SumaJsonMarshaller.Suma
+import com.example.domain.model.gateway.OperacionesGateway
 import com.example.domain.usecase.OperacionesUseCase
+import com.example.infrastructure.drivenadapters.OperacionesGatewayImpl
+import com.google.inject.{AbstractModule, Guice, Injector}
+import javax.inject.Inject
 import spray.http.MediaTypes._
 import spray.http.StatusCodes.InternalServerError
 import spray.routing._
@@ -21,7 +25,8 @@ import scala.util.{Failure, Success}
 // we want to be able to test it independently, without having to spin up an actor
 
 
-class MyServiceActor() extends Actor with MyService {
+//class MyServiceActor @Inject()(algo: OperacionesUseCase) extends Actor with MyService {
+class MyServiceActor extends Actor with MyService {
 
 
   //TODO manejador de Excepciones
@@ -33,7 +38,6 @@ class MyServiceActor() extends Actor with MyService {
           complete(InternalServerError, "Bad numbers, bad result!!!")
         }
     }
-
 
   // the HttpService trait defines only one abstract member, which
   // connects the services environment to the enclosing actor or test
@@ -60,6 +64,7 @@ class MyServiceActor() extends Actor with MyService {
 }*/
 
 class MultiplicacionActor() extends Actor {
+
   override def receive: Receive = {
     case (numero1: Double, numero2: Double) => sender ! Operaciones.multiplicacion(numero1, numero2)
   }
@@ -70,6 +75,14 @@ class MultiplicacionActor() extends Actor {
 trait MyService extends HttpService {
 
   implicit val timeout = Timeout(5.seconds)
+
+  implicit val injector: Injector = Guice.createInjector(new AbstractModule() {
+    override def configure() {
+      bind(classOf[OperacionesGateway]).to(classOf[OperacionesGatewayImpl])
+    }
+  })
+
+  private val operacionesUseCase = injector.getInstance(classOf[OperacionesUseCase])
 
 
   val ERROR_DIVISION: String = "No se puede dividir entre 0";
@@ -92,12 +105,10 @@ trait MyService extends HttpService {
           }
         }
       } ~
-      //(path("test") & parameters('color, 'backgroundColor)) { (color, backgroundColor) =>
       (path("resta") & parameters('numero1.as[Double], 'numero2.as[Double])) { (numero1, numero2) =>
         get {
           respondWithMediaType(`application/json`) {
-            //complete(new OperacionesUseCase().resta(numero1, numero2).toString)
-            complete("")
+            complete(operacionesUseCase.resta(numero1, numero2).toString)
           }
         }
       } ~
@@ -106,7 +117,7 @@ trait MyService extends HttpService {
           entity(as[Suma]) { data =>
             //println(s"${data.numero1} y ${data.numero2}")
             ctx =>
-              Operaciones.suma(data.numero1, data.numero2).onComplete {
+              operacionesUseCase.suma(data.numero1, data.numero2).onComplete {
                 case Success(value) => ctx.complete(value.toString)
                 //case Failure(cause) => Failure(ctx.(new IllegalStateException(cause)))
                 case Failure(cause) => ctx.failWith(new IllegalStateException(cause))
@@ -118,7 +129,7 @@ trait MyService extends HttpService {
         get {
           respondWithMediaType(`application/json`) {
             ctx =>
-              Operaciones.division(numero1, numero2).onComplete {
+              operacionesUseCase.division(numero1, numero2).onComplete {
                 case Success(value) => ctx.complete(value.getOrElse(ERROR_DIVISION).toString)
                 case Failure(cause) => ctx.failWith(new IllegalStateException(cause))
               }
