@@ -66,7 +66,8 @@ class MyServiceActor extends Actor with MyService {
 class MultiplicacionActor() extends Actor {
 
   override def receive: Receive = {
-    case (numero1: Double, numero2: Double) => sender ! Operaciones.multiplicacion(numero1, numero2)
+    case (numero1: Double, numero2: Double,
+    operacionesUseCase: OperacionesUseCase) => sender ! operacionesUseCase.multiplicacion(numero1, numero2)
   }
 }
 
@@ -100,7 +101,7 @@ trait MyService extends HttpService {
         get {
           respondWithMediaType(`application/json`) {
             complete {
-              (serviceMultiplicacion ? (numero1, numero2)).map(resultado => resultado.toString)
+              (serviceMultiplicacion ? (numero1, numero2, operacionesUseCase)).map(resultado => resultado.toString)
             }
           }
         }
